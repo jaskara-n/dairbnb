@@ -165,4 +165,11 @@ contract dairbnb {
             revert dairbnb__enterCorrectAmount();
         }
     }
+
+    //getter functions
+    function getRentalDetails(
+        uint256 _rentalId
+    ) public view returns (rentalDetails memory) {
+        return listedRentals[_rentalId];
+    }
 }

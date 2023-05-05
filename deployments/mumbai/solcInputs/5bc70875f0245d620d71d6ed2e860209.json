@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/dairbnb.sol": {
+      "content": "// SPDX-License-Identifier: MIT\r\n\r\npragma solidity 0.8.8;\r\n\r\ncontract dairbnb {\r\n    //events\r\n    event userCreated(\r\n        string name,\r\n        string dateOfBirth,\r\n        string country,\r\n        bytes32 hashedPassword,\r\n        address userAddress\r\n    );\r\n    event rentalCreated(\r\n        uint256 rentalId,\r\n        string name,\r\n        string description,\r\n        string[] imageURLs,\r\n        uint256 pricePerNight,\r\n        string contact,\r\n        string rentalAddress,\r\n        uint256 maxGuests,\r\n        string city,\r\n        string country,\r\n        address owner\r\n    );\r\n    event rentalBooked(uint256 noOfGuests, uint256 startDate, uint256 endDate);\r\n\r\n    //structs\r\n    struct userDetails {\r\n        string name;\r\n        string dateOfBirth;\r\n        string country;\r\n        bytes32 hashedPassword;\r\n        address userAddress;\r\n    }\r\n\r\n    struct rentalDetails {\r\n        uint256 rentalId;\r\n        string name;\r\n        string description;\r\n        string[] imageURLs;\r\n        uint256 pricePerNight; //in eth\r\n        string contact; //can be email or phone number\r\n        string rentalAddress;\r\n        uint256 maxGuests;\r\n        string city;\r\n        string country;\r\n        address payable owner;\r\n        bool isbooked;\r\n    }\r\n\r\n    struct bookedRentalDetails {\r\n        uint256 noOfGuests;\r\n        uint256 startDate;\r\n        uint256 endDate;\r\n    }\r\n\r\n    //mappings\r\n    mapping(uint256 => rentalDetails) id_to_rentalDetails;\r\n\r\n    //errors\r\n    error dairbnb__rentalAlreadyBooked();\r\n    error dairbnb__enterCorrectAmount();\r\n\r\n    //arrays\r\n    userDetails[] public users;\r\n    rentalDetails[] public listedRentals;\r\n    bookedRentalDetails[] public bookedRentalInfo;\r\n\r\n    //functions\r\n\r\n    //create a new user\r\n    function createUser(\r\n        string memory _name,\r\n        string memory _dateOfBirth,\r\n        string memory _country,\r\n        string memory _password\r\n    ) public {\r\n        bytes32 hashedPassword = keccak256(abi.encodePacked(_password)); //hash encoding the password for user privacy\r\n\r\n        users.push(\r\n            userDetails(\r\n                _name,\r\n                _dateOfBirth,\r\n                _country,\r\n                hashedPassword,\r\n                msg.sender\r\n            )\r\n        );\r\n        emit userCreated(\r\n            _name,\r\n            _dateOfBirth,\r\n            _country,\r\n            hashedPassword,\r\n            msg.sender\r\n        );\r\n    }\r\n\r\n    //create a new rental property\r\n    function createRental(\r\n        uint256 _rentalId,\r\n        string memory _name,\r\n        string memory _description,\r\n        string[] memory _imageURLs,\r\n        uint256 _pricePerNight,\r\n        string memory _contact,\r\n        string memory _rentalAddress,\r\n        uint256 _maxguests,\r\n        string memory _city,\r\n        string memory _country\r\n    ) public {\r\n        listedRentals.push(\r\n            rentalDetails(\r\n                _rentalId,\r\n                _name,\r\n                _description,\r\n                _imageURLs,\r\n                _pricePerNight,\r\n                _contact,\r\n                _rentalAddress,\r\n                _maxguests,\r\n                _city,\r\n                _country,\r\n                payable(msg.sender),\r\n                false\r\n            )\r\n        );\r\n        emit rentalCreated(\r\n            _rentalId,\r\n            _name,\r\n            _description,\r\n            _imageURLs,\r\n            _pricePerNight,\r\n            _contact,\r\n            _rentalAddress,\r\n            _maxguests,\r\n            _city,\r\n            _country,\r\n            msg.sender\r\n        );\r\n    }\r\n\r\n    //book a rental\r\n    function bookRental(\r\n        uint256 _rentalId,\r\n        uint256 _startDate,\r\n        uint256 _endDate,\r\n        uint256 noOfGuests\r\n    ) public payable {\r\n        if (listedRentals[_rentalId].isbooked == true) {\r\n            revert dairbnb__rentalAlreadyBooked();\r\n        }\r\n        if (\r\n            msg.value ==\r\n            ((listedRentals[_rentalId].pricePerNight) * (_endDate - _startDate))\r\n        ) {\r\n            listedRentals[_rentalId].owner.transfer(msg.value);\r\n            listedRentals[_rentalId].isbooked = true;\r\n            bookedRentalInfo.push(\r\n                bookedRentalDetails(noOfGuests, _startDate, _endDate)\r\n            );\r\n            emit rentalBooked(noOfGuests, _startDate, _endDate);\r\n        } else {\r\n            revert dairbnb__enterCorrectAmount();\r\n        }\r\n    }\r\n\r\n    //getter functions\r\n    function getRentalDetails(\r\n        uint256 _rentalId\r\n    ) public view returns (rentalDetails memory) {\r\n        return listedRentals[_rentalId];\r\n    }\r\n}\r\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
