@@ -110,22 +110,23 @@ contract dairbnb {
         string memory _city,
         string memory _country
     ) public {
-        listedRentals.push(
-            rentalDetails(
-                _rentalId,
-                _name,
-                _description,
-                _imageURLs,
-                _pricePerNight,
-                _contact,
-                _rentalAddress,
-                _maxguests,
-                _city,
-                _country,
-                payable(msg.sender),
-                false
-            )
+        rentalDetails memory rental = rentalDetails(
+            _rentalId,
+            _name,
+            _description,
+            _imageURLs,
+            _pricePerNight,
+            _contact,
+            _rentalAddress,
+            _maxguests,
+            _city,
+            _country,
+            payable(msg.sender),
+            false
         );
+
+        id_to_rentalDetails[_rentalId] = rental;
+
         emit rentalCreated(
             _rentalId,
             _name,
@@ -170,6 +171,6 @@ contract dairbnb {
     function getRentalDetails(
         uint256 _rentalId
     ) public view returns (rentalDetails memory) {
-        return listedRentals[_rentalId];
+        return id_to_rentalDetails[_rentalId];
     }
 }
